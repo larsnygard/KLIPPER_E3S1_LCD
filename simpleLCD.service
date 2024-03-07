@@ -5,7 +5,7 @@
  [Service]
  Type=idle
  ExecStartPre=/bin/sleep 20
- ExecStart=/bin/sh -c '~/KLIPPER_E3S1_LCD/run.sh'
+ ExecStart=/bin/sh -c '/home/ender/KLIPPER_E3S1_LCD/run.sh'
 
  [Install]
  WantedBy=multi-user.target

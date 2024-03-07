@@ -1,4 +1,4 @@
-# DWIN_T5UIC1_LCD_E3S1
+# DWIN_T5UIC1_LCD_E3S1 -> Update for techincal debt
 
 ## Python class for the Ender 3 V2 and Ender 3 S1 LCD runing klipper3d with Moonraker 
 
@@ -35,17 +35,6 @@ If not, add it then restart your pi or 'klipper.service'.
 
 Again assuming you used Mainsail or KIAUH, this should be by defualt.
 
-### Library requirements 
-
-  Thanks to [wolfstlkr](https://www.reddit.com/r/ender3v2/comments/mdtjvk/octoprint_klipper_v2_lcd/gspae7y)
-
-  `sudo apt-get install python3-pip python3-gpiozero python3-serial git`
-
-  `sudo pip3 install multitimer`
-
-  `git clone https://github.com/RobRobM/DWIN_T5UIC1_LCD_E3S1.git`
-
-
 ### Wire the display 
 
 <img src ="images/Raspberry_Pi_GPIO.png?raw=true" width="800" height="572">
@@ -80,9 +69,22 @@ I have added some Ender 3S1 specific images:
 <img src ="images/Ender3S1_LCD_Board.JPG?raw=true" width="325" height="200">
 <img src ="images/Ender3S1_LCD_plug.jpg?raw=true" width="325" height="220">
 
-### Run The Code
 
-Enter the downloaded DWIN_T5UIC1_LCD_E3S1 folder.
+### Library requirements - Install these now
+
+  Thanks to [wolfstlkr](https://www.reddit.com/r/ender3v2/comments/mdtjvk/octoprint_klipper_v2_lcd/gspae7y)
+
+  `sudo apt-get install python3-pip python3-gpiozero python3-serial git`
+
+  `sudo pip3 install multitimer`
+
+  `git clone https://github.com/nojoyy/KLIPPER_E3S1_LCD.git`
+
+## Run the Code
+
+### Configure API
+
+Enter the downloaded KLIPPER_E3S1_LCD folder.
 
 To get  your API key run:
 
@@ -90,12 +92,11 @@ To get  your API key run:
 ~/moonraker/scripts/fetch-apikey.sh
 ```
 
-Edit the file run.py and paste your API key and verify that you have the proper API_Endpoint address
-
+Edit the file run.py and paste your API key and verify that you have the proper API_Endpoint address.
 ```bash
 nano run.py
 ```
-This is how the run.py looks for an Ender3v2 and Ender 3 S1
+This is how the run.py looks for Ender 3 S1, please modify 'ender' with your username (i.e. pi, klipper, etc.)
 
 ```python
 #!/usr/bin/env python3
@@ -105,13 +106,14 @@ encoder_Pins = (26, 19)
 button_Pin = 13
 LCD_COM_Port = '/dev/ttyAMA0'
 API_Key = 'XXXXXX'
-API_Endpoint = '~/printer_data/comms/klippy.sock'
+API_Endpoint = '/home/ender/printer_data/comms/klippy.sock'
 
 DWINLCD = DWIN_LCD(
 	LCD_COM_Port,
 	encoder_Pins,
 	button_Pin,
-	API_Key
+	API_Key,
+	API_Endpoint
 )
 ```
 
@@ -125,15 +127,45 @@ encoder_Pins = (19, 26)
 button_Pin = 13
 LCD_COM_Port = '/dev/ttyAMA0'
 API_Key = 'XXXXXX'
+API_Endpoint = '/home/ender/printer_data/comms/klippy.sock'
 
 DWINLCD = DWIN_LCD(
 	LCD_COM_Port,
 	encoder_Pins,
 	button_Pin,
-	API_Key
+	API_Key,
+	API_Endpoint
 )
 ```
-Make run.py executable
+
+### Finding Endpoint
+
+Assuming your endpoint doesn't match the provided default, it can be found via the 'klipper.env' file referenced in the EnvironmentFile listed in '/etc/systemd/system/klipper.service' or the direct ExecStart via the -a parameter.
+
+Example Service:
+```
+[Unit]
+Description=Klipper 3D Printer Firmware SV1
+Documentation=https://www.klipper3d.org/
+After=network-online.target
+Wants=udev.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=ender
+RemainAfterExit=yes
+WorkingDirectory=/home/ender/klipper
+EnvironmentFile=/home/ender/printer_data/systemd/klipper.env
+ExecStart=/home/ender/klippy-env/bin/python $KLIPPER_ARGS
+Restart=always
+RestartSec=10
+```
+
+### Verify Connection
+Once modified, ensure run.py is executable
 
 ```
 sudo chmod +x run.py
@@ -146,7 +178,7 @@ Your output should be:
 DWIN handshake 
 DWIN OK.
 http://127.0.0.1:80
-Waiting for connect to /tmp/klippy_uds
+Waiting for connect to $API_endpoint
 
 Connection.
 
@@ -157,33 +189,48 @@ Web site exists
 
 Press ctrl+c to exit run.py
 
-# Run at boot:
+If the test fails to connect, make be sure to double check the existence of the endpoint files or other files in the klipper.env file.
+
+### Run at boot:
 
 	Note: Delay of 20s after boot to allow webservices to settal.
-	
-	path of `run.sh` is expected to be `/home/pi/DWIN_T5UIC1_LCD_E3S1/run.sh`
-	path of `run.py` is expected to be `/home/pi/DWIN_T5UIC1_LCD_E3S1/run.py`
-	
+
 	The run.sh script that is loaded by simpleLCD.service will re-run run.py on firmware restarts of the printe. If it fails to start for 5 times within 30 second it will exit and stop until the net boot.
 
-	Note if you cloned the repo anywhere other than the home directory, you will need to modify the simpleLCD.service prior to copying it /lib/systemd/service
+	Note if you cloned the repo anywhere other than /home/ender, you will need to modify the 'simpleLCD.service' prior to copying it /lib/systemd/service
+
+	Just modify 'simpleLCD.service' to point to the correct path of the script.
+
+Afterwards, ensure execute permissions:
 
 ```bash
 sudo chmod +x run.sh simpleLCD.service
 ```
-   
+
+Copy to systemd:
+
 ```bash
 sudo cp simpleLCD.service /lib/systemd/system/simpleLCD.service
 ```
-   
+
+set system permissions:
+
 ```bash
 sudo chmod 644 /lib/systemd/system/simpleLCD.service
 ```
 
+Reload daemon and enable and start simpleLCD service
 ```bash
-sudo systemctl daemon-reload && sudo systemctl enable simpleLCD.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now simpleLCD.service
 ```
 
+If service did not start, check status via
+```bash
+sudo systemctl status simpleLCD.service
+```
+
+Worst comes to worst:
 ```bash
 sudo reboot
 ```
