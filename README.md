@@ -1,4 +1,4 @@
-    # DWIN_T5UIC1_LCD_E3S1 -> Update for techincal debt
+# DWIN_T5UIC1_LCD_E3S1 -> Update for techincal debt
 
 ## Python class for the Ender 3 V2 and Ender 3 S1 LCD runing klipper3d with Moonraker 
 
@@ -197,7 +197,7 @@ If the test fails to connect, make be sure to double check the existence of the 
 
 The run.sh script that is loaded by simpleLCD.service will re-run run.py on firmware restarts of the printe. If it fails to start for 5 times within 30 second it will exit and stop until the net boot.
 
-Note if you cloned the repo anywhere other than /home/ender, you will need to modify the 'simpleLCD.service' and 'run.sh' prior to copying 'simpleLCD.service' to /lib/systemd/service
+Note if you cloned the repo anywhere other than /home/ender, you will need to modify the 'simpleLCD.service' and 'run.sh' prior to copying 'simpleLCD.service' to /lib/systemd/service.
 
 Just modify 'simpleLCD.service' to point to the correct path of the script.
 
