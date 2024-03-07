@@ -10,9 +10,10 @@ https://github.com/arksine/moonraker
 
 
 ## Setup:
+   Assuming you used [Mainsail](https://docs.mainsail.xyz/setup/getting-started) or [KIAUH](https://github.com/dw-0/kiauh), most of this is already set up.  
 
 ### [Disable Linux serial console](https://www.raspberrypi.org/documentation/configuration/uart.md)
-  By default, the primary UART is assigned to the Linux console. If you wish to use the primary UART for other purposes, you must reconfigure Raspberry Pi OS. This can be done by using raspi-config:
+  It's possible the primary UART is assigned to the Linux console. If you wish to use the primary UART for other purposes, you must reconfigure Raspberry Pi OS. This can be done by using raspi-config:
 
   * Start raspi-config: `sudo raspi-config.`
   * Select option 3 - Interface Options.
@@ -23,40 +24,16 @@ https://github.com/arksine/moonraker
   
   For full instructions on how to use Device Tree overlays see [this page](https://www.raspberrypi.org/documentation/configuration/device-tree.md). 
   
-  In brief, add a line to the `/boot/config.txt` file to apply a Device Tree overlay.
+  In brief, ensure there is a line in the `/boot/config.txt` file to apply a Device Tree overlay.
     
     dtoverlay=disable-bt
 
 ### Check if Klipper's Application Programmer Interface (API) is enabled
 
-Open klipper.service and check ([Service]... ExecStart=...) if klipper.py is started with the -a parameter
+Open ~/printer_data/systemd/klipper.env and ensure the KLIPPER_ARGS variable includes an something like '-a ~/printer_data/comms/klippy.sock'.
+If not, add it then restart your pi or 'klipper.service'.
 
-```
-sudo nano /etc/systemd/system/klipper.service
-```
-
-If not, add it and reboot your pi.
-
-Example of my klipper.service:
-
-```bash
-#Systemd service file for klipper
-
-[Unit]
-Description=Starts klipper on startup
-After=network.target
-
-[Install]
-WantedBy=multi-user.target
-
-[Service]
-Type=simple
-User=pi
-RemainAfterExit=yes
-ExecStart=/home/pi/klippy-env/bin/python /home/pi/klipper/klippy/klippy.py /home/pi/klipper_config/printer.cfg -l /home/pi/klipper_logs/klippy.log -a /tmp/klippy_uds
-Restart=always
-RestartSec=10
-```
+Again assuming you used Mainsail or KIAUH, this should be by defualt.
 
 ### Library requirements 
 
@@ -113,7 +90,7 @@ To get  your API key run:
 ~/moonraker/scripts/fetch-apikey.sh
 ```
 
-Edit the file run.py and past your API key
+Edit the file run.py and paste your API key and verify that you have the proper API_Endpoint address
 
 ```bash
 nano run.py
@@ -128,6 +105,7 @@ encoder_Pins = (26, 19)
 button_Pin = 13
 LCD_COM_Port = '/dev/ttyAMA0'
 API_Key = 'XXXXXX'
+API_Endpoint = '~/printer_data/comms/klippy.sock'
 
 DWINLCD = DWIN_LCD(
 	LCD_COM_Port,
@@ -186,7 +164,9 @@ Press ctrl+c to exit run.py
 	path of `run.sh` is expected to be `/home/pi/DWIN_T5UIC1_LCD_E3S1/run.sh`
 	path of `run.py` is expected to be `/home/pi/DWIN_T5UIC1_LCD_E3S1/run.py`
 	
-	The run.sh script that is loaded by simpleLCD.service will re-run run.py on firmware restarts of the printe. If it fails to start for 5 times within 30 second it will exit and stop until the net boot. 
+	The run.sh script that is loaded by simpleLCD.service will re-run run.py on firmware restarts of the printe. If it fails to start for 5 times within 30 second it will exit and stop until the net boot.
+
+	Note if you cloned the repo anywhere other than the home directory, you will need to modify the simpleLCD.service prior to copying it /lib/systemd/service
 
 ```bash
 sudo chmod +x run.sh simpleLCD.service

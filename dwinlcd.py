@@ -302,7 +302,7 @@ class DWIN_LCD:
 	# Dwen serial screen initialization
 	# Passing parameters: serial port number
 	# DWIN screen uses serial port 1 to send
-	def __init__(self, USARTx, encoder_pins, button_pin, octoPrint_API_Key):
+	def __init__(self, USARTx, encoder_pins, button_pin, octoPrint_API_Key, endpoint):
 		GPIO.setmode(GPIO.BCM)
 		self.encoder = Encoder(encoder_pins[0], encoder_pins[1])
 		self.button_pin = button_pin
@@ -316,7 +316,7 @@ class DWIN_LCD:
 		self.last_cardpercentValue = 101
 		self.lcd = T5UIC1_LCD(USARTx)
 		self.checkkey = self.MainMenu
-		self.pd = PrinterData(octoPrint_API_Key)
+		self.pd = PrinterData(octoPrint_API_Key, endpoint)
 		self.timer = multitimer.MultiTimer(interval=2, function=self.EachMomentUpdate)
 		self.HMI_ShowBoot()
 		print("Boot looks good")

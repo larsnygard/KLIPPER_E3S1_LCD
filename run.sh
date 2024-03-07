@@ -7,7 +7,7 @@ do
   # Run the Python script and save the start time
   echo "LCD attempt $i"
   sleep 4
-  /usr/bin/env python3 /home/pi/DWIN_T5UIC1_LCD_E3S1/run.py  > /tmp/lcd.log 2>&1 &
+  /usr/bin/env python3 run.py  > /tmp/lcd.log 2>&1 &
   script_pid=$!
   script_start_time=$(date +%s)
   # Wait for the Python script to finish
