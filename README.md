@@ -1,4 +1,4 @@
-# DWIN_T5UIC1_LCD_E3S1 -> Update for techincal debt
+    # DWIN_T5UIC1_LCD_E3S1 -> Update for techincal debt
 
 ## Python class for the Ender 3 V2 and Ender 3 S1 LCD runing klipper3d with Moonraker 
 
@@ -193,18 +193,20 @@ If the test fails to connect, make be sure to double check the existence of the 
 
 ### Run at boot:
 
-	Note: Delay of 20s after boot to allow webservices to settal.
+    Note: Delay of 20s after boot to allow webservices to settal.
 
-	The run.sh script that is loaded by simpleLCD.service will re-run run.py on firmware restarts of the printe. If it fails to start for 5 times within 30 second it will exit and stop until the net boot.
+The run.sh script that is loaded by simpleLCD.service will re-run run.py on firmware restarts of the printe. If it fails to start for 5 times within 30 second it will exit and stop until the net boot.
 
-	Note if you cloned the repo anywhere other than /home/ender, you will need to modify the 'simpleLCD.service' prior to copying it /lib/systemd/service
+Note if you cloned the repo anywhere other than /home/ender, you will need to modify the 'simpleLCD.service' and 'run.sh' prior to copying 'simpleLCD.service' to /lib/systemd/service
 
-	Just modify 'simpleLCD.service' to point to the correct path of the script.
+Just modify 'simpleLCD.service' to point to the correct path of the script.
+
+You will also need to modify run.sh to point to the directory you installed the files of the repo to.
 
 Afterwards, ensure execute permissions:
 
 ```bash
-sudo chmod +x run.sh simpleLCD.service
+sudo chmod +x run.py run.sh simpleLCD.service
 ```
 
 Copy to systemd:
@@ -221,8 +223,7 @@ sudo chmod 644 /lib/systemd/system/simpleLCD.service
 
 Reload daemon and enable and start simpleLCD service
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now simpleLCD.service
+sudo systemctl daemon-reload && sudo systemctl enable --now simpleLCD.service
 ```
 
 If service did not start, check status via
