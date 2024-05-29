@@ -12,6 +12,24 @@ https://github.com/arksine/moonraker
 ## Setup:
    Assuming you used [Mainsail](https://docs.mainsail.xyz/setup/getting-started) or [KIAUH](https://github.com/dw-0/kiauh), most of this is already set up.  
 
+### Note on how to get it working on OrangePi3 LTS  
+  * GPIO pins must support interups, if not /sys/class/gpio/gpioxxx/edge will not be created, and you will get a permission denied fault. (https://mjmwired.net/kernel/Documentation/gpio.txt#634)
+  *  Use python library OPi.GPIO-ex (https://pypi.org/project/OPi.GPIO-ex/) instead of RPi.GPIO.
+  *  Install and use wiringOP (https://github.com/orangepi-xunlong/wiringOP) instead of wiringPi
+  *  Enable UART overlay in /boot/orangepiEnv.txt (or armbianEnv.txt for armbian) by adding a line
+  *   `overlays=uart3` This will enable uart3 (/dev/ttyS3) on physical pin 11 and 13 after a reboot
+  *   Replace RPi with Opi in the start of encoder.py and dwinlcd.py
+  *   Replace  GPIO.setmode(GPIO.BCM) with GPIO.setmode(GPIO.BOARD) in dwinlcd.py (https://github.com/larsnygard/KLIPPER_E3S1_LCD/blob/main/dwinlcd.py#L306C3-L306C25)
+  *   Edit run.py and use these pins (they shouldmap to PL02, PL03 and PL08:
+  
+    encoder_Pins = (10, 8)
+    button_Pin = 26
+    LCD_COM_Port = '/dev/ttyS3'`
+    
+  * That should be it. Rest of the setup should be as normal. You might need to install some pythons libs (multitimer, pyserial, requests). Python is probably managed, so search and decide which method to accomplish this.
+  * There should be no need to disable serial console or bt
+
+
 ### [Disable Linux serial console](https://www.raspberrypi.org/documentation/configuration/uart.md)
   It's possible the primary UART is assigned to the Linux console. If you wish to use the primary UART for other purposes, you must reconfigure Raspberry Pi OS. This can be done by using raspi-config:
 
